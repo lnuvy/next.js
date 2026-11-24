@@ -868,6 +868,18 @@ export async function initialize(opts: {
             )
           }
         }
+        if (
+          matchedOutput.type === 'nextStaticFolder' &&
+          matchedOutput.itemPath.endsWith('.js') &&
+          !matchedOutput.itemPath.startsWith('/service-worker/') &&
+          !res.getHeader('cross-origin-embedder-policy')
+        ) {
+          // A dedicated worker started from a document with a
+          // `Cross-Origin-Embedder-Policy` only loads when the worker script's
+          // response has a compatible policy. The header has no effect on
+          // scripts loaded with <script> or importScripts().
+          res.setHeader('Cross-Origin-Embedder-Policy', 'credentialless')
+        }
         if (!(req.method === 'GET' || req.method === 'HEAD')) {
           res.setHeader('Allow', ['GET', 'HEAD'])
           res.statusCode = 405
